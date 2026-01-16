@@ -2,7 +2,7 @@
 Author: chensi-cs 
 Date: 2026-01-15 16:12:33
 LastEditors: chensi-cs 
-LastEditTime: 2026-01-16 13:43:14
+LastEditTime: 2026-01-16 15:38:38
 FilePath: \流程网页\backend.py
 Description: 
 '''
@@ -442,7 +442,7 @@ def call_llm_to_generate_code(algorithm_name: str, dataset_path: str) -> str:
 - 分类：XGBClassifier
 - 回归：XGBRegressor
 
-请直接输出 train.py 完整源码，并以 {LLM_END_MARKER} 结束。
+请直接输出 train.py 完整源码，并n以 {LLM_END_MARKER} 结束。
 """.strip()
 
     base_messages = [
@@ -452,6 +452,116 @@ def call_llm_to_generate_code(algorithm_name: str, dataset_path: str) -> str:
     return _generate_with_continuation(base_messages, end_marker=LLM_END_MARKER, max_rounds=LLM_CONTINUE_MAX_ROUNDS)
 
 
+# ================== 大模型根据数据推荐算法 ==================
+def call_llm_to_recommend_algorithm(dataset_path: str) -> str:
+    """
+    调用LLM分析数据集，推荐最合适的算法
+    返回算法名称字符串
+    """
+    try:
+        # 读取数据集进行分析
+        df = pd.read_csv(dataset_path, nrows=200)  # 读取前200行
+        n_samples, n_features = df.shape
+        target_col = df.columns[-1]
+        
+        # 分析目标列类型
+        target_dtype = str(df[target_col].dtype)
+        unique_values = df[target_col].nunique()
+        
+        # 判断问题类型
+        if target_dtype in ['object', 'str', 'bool']:
+            problem_type = "classification"
+            default_algo = "XGBClassifier"
+        elif unique_values <= 10:  # 少于10个唯一值，可能是分类
+            problem_type = "classification"
+            default_algo = "XGBClassifier"
+        else:
+            problem_type = "regression"
+            default_algo = "XGBRegressor"
+        
+        # 构建数据集摘要
+        dataset_summary = f"""
+数据集分析报告：
+- 数据规模: {n_samples} 个样本, {n_features} 个特征
+- 目标列: '{target_col}' (数据类型: {target_dtype})
+- 问题类型: {problem_type} (唯一值数量: {unique_values})
+- 特征类型: 混合类型
+- 数据大小: {os.path.getsize(dataset_path) / 1024:.1f} KB
+"""
+        
+        prompt = f"""
+你是一名资深的数据科学家，请分析以下数据集并推荐最适合的机器学习算法。
+
+【数据集分析报告】
+{dataset_summary}
+
+【推荐要求】
+1. 基于数据集规模、特征类型、问题类型推荐
+2. 优先考虑准确性和训练效率
+3. 如果是小数据集，推荐较简单的算法
+4. 如果是大数据集，推荐可扩展的算法
+
+【输出格式】
+只输出一个算法名称，例如：
+RandomForestClassifier
+或
+XGBRegressor
+
+请推荐最适合的算法：
+"""
+        
+        # 调用LLM
+        response = _siliconflow_chat(
+            messages=[
+                {"role": "system", "content": "你是专业的机器学习工程师，擅长算法推荐。"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=30
+        )
+        
+        # 清理响应
+        algorithm = response.strip()
+        algorithm = algorithm.replace("```", "").strip()
+        algorithm = algorithm.strip('"').strip("'")
+        
+        # 验证算法名称
+        valid_algorithms = [
+            "XGBClassifier", "XGBRegressor",
+            "RandomForestClassifier", "RandomForestRegressor",
+            "LogisticRegression", "LinearRegression",
+            "GradientBoostingClassifier", "GradientBoostingRegressor",
+            "SVC", "SVR",
+            "KNeighborsClassifier", "KNeighborsRegressor",
+            "DecisionTreeClassifier", "DecisionTreeRegressor",
+            "LGBMClassifier", "LGBMRegressor",
+            "CatBoostClassifier", "CatBoostRegressor"
+        ]
+        
+        # 检查是否是有效的算法名称
+        for valid_algo in valid_algorithms:
+            if valid_algo.lower() in algorithm.lower():
+                print(f"✅ LLM推荐的算法: {valid_algo}")
+                return valid_algo
+        
+        # 如果无法识别，使用基于问题类型的默认值
+        print(f"⚠️ LLM推荐 '{algorithm}' 无法识别，使用默认值: {default_algo}")
+        return default_algo
+        
+    except Exception as e:
+        print(f"❌ 算法推荐失败: {e}")
+        # 返回基于文件大小的默认值
+        try:
+            file_size = os.path.getsize(dataset_path)
+            if file_size < 1024 * 100:  # 小于100KB
+                return "RandomForestClassifier"
+            else:
+                return "XGBClassifier"
+        except:
+            return "XGBClassifier"
+        
+
+        
 # ================== LLM 修复 train.py ==================
 
 def _get_dataset_brief(dataset_path: str) -> str:
@@ -550,6 +660,7 @@ class FixCodeRequest(BaseModel):
 
 @app.post("/generate_code")
 async def generate_code(
+    algorithm_option: str = Form("manual"),  # "manual" 或 "auto"
     algorithm_name: str = Form(...),
     file: UploadFile = File(...),
 ):
@@ -592,6 +703,24 @@ async def generate_code(
     print(f"🗂️ DATASETS 字典当前大小: {len(DATASETS)}")
 
     env_file = create_env_file_for_dataset(dataset_path)
+    # ===== 新增：算法选择逻辑 =====
+    final_algorithm_name = algorithm_name
+
+    if algorithm_option == "auto":
+        print("🤖 正在调用大模型推荐算法...")
+        try:
+            recommended_algorithm = call_llm_to_recommend_algorithm(dataset_path)
+            final_algorithm_name = recommended_algorithm
+            print(f"✅ 大模型推荐的算法: {final_algorithm_name}")
+        except Exception as e:
+            print(f"❌ 算法推荐失败，使用默认算法: {e}")
+            final_algorithm_name = "XGBClassifier"  # 默认值
+    elif not algorithm_name or not algorithm_name.strip():
+        print("⚠️ 未提供算法名称，使用默认算法")
+        final_algorithm_name = "XGBClassifier"  # 默认值
+    
+    final_algorithm_name = final_algorithm_name or "XGBClassifier"
+    print(f"🎯 最终使用的算法: {final_algorithm_name}")
 
     try:
         print("🤖 正在调用大模型生成代码...")
@@ -610,6 +739,8 @@ async def generate_code(
         "dataset_id": dataset_id,
         "generated_code": code,
         "env_file": env_file,
+        "algorithm_used": final_algorithm_name,  # 新增：返回实际使用的算法
+        "algorithm_recommended": algorithm_option == "auto",  # 新增：是否是推荐的
     }
 
 
@@ -864,23 +995,62 @@ async def setup_remote_env(req: RunCodeRequest):
             print(f"⚠️ 检查文件时出错: {check_error}")
 
         # 创建虚拟环境并安装依赖
+        # python -m venv .venv: 在远程项目目录创建名为 .venv 的虚拟环境
         setup_cmd = f"""
-        cd {remote_project_dir} && \
-        echo "创建虚拟环境..." && \
-        python3 -m venv .venv && \
-        echo "升级pip..." && \
-        .venv/bin/python -m pip install --upgrade pip -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com && \
-        echo "安装PyTorch..." && \
-        .venv/bin/python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
-        echo "安装其他依赖..." && \
-        .venv/bin/python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && \
-        echo "依赖安装完成！"
-        """
+            cd {remote_project_dir} && \
+            echo "===== 环境前置检查 =====" && \
+            # 打印核心环境信息（便于排查）
+            python --version && \
+            pip --version 2>/dev/null || echo "系统pip未安装" && \
+            echo "===== 清理旧虚拟环境 =====" && \
+            rm -rf .venv && \
+            echo "===== 创建虚拟环境 =====" && \
+            python -m venv .venv && \
+            echo "===== 升级pip到兼容版本 =====" && \
+            # 锁定pip版本为23.3.1（兼容Python3.11+numpy/torch）
+            .venv/bin/python -m pip install --upgrade pip==23.3.1 \
+            -i https://mirrors.aliyun.com/pypi/simple \
+            --trusted-host mirrors.aliyun.com && \
+            echo "===== 预安装兼容版numpy（避免编译错误） =====" && \
+            # 安装无需编译的numpy稳定版（1.26.4适配Python3.11）
+            .venv/bin/python -m pip install numpy==1.26.4 \
+            -i https://pypi.tuna.tsinghua.edu.cn/simple \
+            --trusted-host pypi.tuna.tsinghua.edu.cn && \
+            echo "===== 安装PyTorch（兼容CUDA 11.8） =====" && \
+            # 核心修改：用extra-index-url替代index-url，避免源限制
+            # 优先清华源下通用依赖，PyTorch专属包从官方源下
+            .venv/bin/python -m pip install torch torchvision torchaudio \
+            -i https://pypi.tuna.tsinghua.edu.cn/simple \
+            --extra-index-url https://download.pytorch.org/whl/cu118 \
+            --trusted-host pypi.tuna.tsinghua.edu.cn \
+            --trusted-host download.pytorch.org || (
+                echo "⚠️ CUDA版本不兼容，降级安装CPU版PyTorch" && \
+                .venv/bin/python -m pip install torch torchvision torchaudio \
+                -i https://pypi.tuna.tsinghua.edu.cn/simple \
+                --trusted-host pypi.tuna.tsinghua.edu.cn
+            ) && \
+            echo "===== 安装业务依赖 =====" && \
+            .venv/bin/python -m pip install -r requirements.txt \
+            -i https://pypi.tuna.tsinghua.edu.cn/simple \
+            --trusted-host pypi.tuna.tsinghua.edu.cn && \
+            echo "===== 依赖版本验证 =====" && \
+            # 验证核心依赖是否安装成功（关键：失败则整个命令返回非0）
+            .venv/bin/python -c "
+            import numpy
+            import torch
+            import pandas  # 确保pandas安装（业务核心依赖）
+            print('✅ numpy版本:', numpy.__version__)
+            print('✅ torch版本:', torch.__version__)
+            print('✅ CUDA可用:', torch.cuda.is_available())
+            print('✅ pandas版本:', pandas.__version__)
+            " && \
+            echo "===== 环境安装完成 ====="
+            """
         
         print("🔧 正在设置远程环境...")
         stdin, stdout, stderr = ssh.exec_command(setup_cmd, get_pty=True)
         
-        # 实时输出
+        # 远程命令实时输出日志
         import time
         output_lines = []
         error_lines = []
@@ -993,7 +1163,7 @@ async def run_remote_train(req: TrainRequest):
     print("🔍 检查远程文件...")
     check_cmds = [
         f"cd {remote_project_dir} && ls -la",
-        f"cd {remote_project_dir} && ls -la .venv/bin/python 2>/dev/null || echo '未找到 .venv'",
+        f"cd {remote_project_dir} && ls -la .venv/bin/python 2>/dev/null || echo '未找到 .venv'", #列出虚拟环境中的Python解释器的详细信息
         f"cd {remote_project_dir} && head -20 train.py"
     ]
     
