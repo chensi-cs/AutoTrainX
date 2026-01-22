@@ -1,0 +1,457 @@
+/* frontend.css */
+/* 主容器样式 */
+.gr-blocks {
+    padding: 20px !important;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    min-height: 100vh !important;
+}
+
+/* ==================== 问题1：高度一致解决方案 ==================== */
+/* 算法推荐区域统一框样式 - 简化 */
+.gr-group {
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    background: #ffffff !important; /* 改为纯白色，不要灰色渐变 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.3s ease !important;
+    height: 240px !important; /* 关键：固定高度，与左边一致 */
+    min-height: 240px !important;
+    max-height: 240px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* 文件上传区域 */
+#file_upload {
+    border: 2px dashed #4CAF50 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease !important;
+    height: 240px !important; /* 固定高度 */
+    min-height: 240px !important;
+    max-height: 240px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* 确保两列行容器高度一致 */
+.gr-row[equal-height="true"] {
+    height: 260px !important; /* 给一点额外空间 */
+}
+
+.gr-row[equal-height="true"] .gr-column {
+    height: 100% !important;
+}
+
+/* ==================== 问题2：按钮宽度占满 ==================== */
+/* gr-group内的按钮行 */
+.gr-group .gr-row {
+    margin-bottom: 15px !important;
+    justify-content: space-between !important; /* 改为space-between */
+    gap: 10px !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+/* gr-group内的按钮 - 占满宽度 */
+#llm_recommend_btn, #auto_recommend_btn {
+    flex: 1 !important; /* 关键：各占50% */
+    margin: 0 !important;
+    padding: 14px 0 !important; /* 增加垂直内边距 */
+    border-radius: 8px !important;
+    min-width: 0 !important; /* 允许缩小 */
+    max-width: 100% !important; /* 允许扩展到100% */
+    width: 100% !important;
+    font-size: 13px !important;
+}
+
+/* ==================== 问题3：背景改为白色 ==================== */
+.gr-group {
+    background: #ffffff !important; /* 纯白色背景 */
+}
+
+/* gr-group悬停效果 */
+.gr-group:hover {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.15) !important;
+    background: #ffffff !important; /* 悬停时也是白色 */
+}
+
+/* gr-group标题 */
+.gr-group .markdown {
+    text-align: center !important;
+    margin-bottom: 15px !important;
+}
+
+.gr-group .markdown h3 {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+    color: #2E7D32 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #4CAF50 !important;
+    padding-bottom: 8px !important;
+    background: transparent !important; /* 确保标题背景透明 */
+}
+
+/* gr-group内的算法信息框 */
+.gr-group #algo_info {
+    background-color: rgba(255, 248, 225, 0.8) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    border: 1px solid #FFC107 !important;
+    font-size: 14px !important;
+    min-height: 60px !important;
+    margin-top: 10px !important;
+    box-shadow: inset 0 2px 4px rgba(255, 193, 7, 0.1) !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* 文件上传框悬停效果 */
+#file_upload:hover {
+    border-color: #2E7D32 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.2) !important;
+}
+
+
+/* ===== 统一按钮基础样式 ===== */
+#preprocess_btn, #setup_btn, #generate_btn, #train_btn, #fix_btn,#oneclick_btn {
+    border-radius: 10px !important;
+    font-weight: bold !important;
+    transition: all 0.3s ease !important;
+    margin: 2px !important; /* 间隔更小 */
+    padding: 14px 28px !important; /* 内边距更大，按钮更宽 */
+    border: none !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    min-height: 52px !important; /* 高度略增加 */
+    line-height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    min-width: 160px !important; /* 最小宽度增加 */
+    flex: 1 !important; /* 按钮自动填充可用空间 */
+    max-width: 200px !important; /* 最大宽度限制 */
+    cursor: pointer !important;
+    }
+
+/* ===== ① 数据预处理按钮（橙色） ===== */
+#preprocess_btn {
+    background: linear-gradient(135deg, #FF9800, #EF6C00) !important;
+    /* 橙黄色渐变 */
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(255, 152, 0, 0.3) !important;
+}
+
+#preprocess_btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4) !important;
+}
+
+/* ===== ② 配置环境按钮（青色） ===== */
+#setup_btn {
+    background: linear-gradient(135deg, #00BCD4, #006064) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(0, 188, 212, 0.3) !important;
+}
+
+#setup_btn:hover {
+    transform: translateY(-3px) !important;  /* 鼠标悬停时向上移动3像素 */
+    box-shadow: 0 6px 12px rgba(0, 188, 212, 0.4) !important; /* 悬停时阴影更大 */
+}
+
+/* ===== ③ 生成代码按钮（绿色） ===== */
+#generate_btn {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3) !important;
+}
+
+#generate_btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4) !important;
+}
+
+/* ===== ④ 运行训练按钮（蓝色） ===== */
+#train_btn {
+    background: linear-gradient(135deg, #2196F3, #0D47A1) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3) !important;
+}
+
+#train_btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4) !important;
+}
+
+/* ===== ⑤ 修复代码按钮（紫色） ===== */
+#fix_btn {
+    background: linear-gradient(135deg, #9C27B0, #4A148C) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3) !important;
+}
+
+#fix_btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 12px rgba(156, 39, 176, 0.4) !important;
+}
+
+#oneclick_btn{
+    background: linear-gradient(135deg, #4ce66e, #35bb52) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(69, 185, 69, 0.3) !important;
+}
+
+#oneclick_btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 12px rgba(69, 185, 69, 0.3) !important;
+}
+
+/* 数据预览表格 */
+#data_preview {
+    border-radius: 10px !important;
+    border: 1px solid #e0e0e0 !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* 状态框 */
+#status_box {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    border-left: 5px solid #4CAF50 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0) !important;
+}
+
+
+/* 算法信息框优化 */
+#algo_info {
+    margin-top: 10px !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    min-height: 60px !important;
+}
+
+/* 算法推荐按钮布局优化 */
+#llm_recommend_btn, #auto_recommend_btn {
+    width: 100% !important;
+    margin: 5px 0 !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+}
+
+/* 代码编辑器 */
+#code_box {
+    border-radius: 10px !important;
+    border: 1px solid #ddd !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    font-family: 'Consolas', 'Monaco', monospace !important;
+    background-color: #f8f9fa !important;
+}
+
+/* 日志区域 */
+#env_log, #train_log, #error_input {
+    border-radius: 8px !important;
+    border: 1px solid #e0e0e0 !important;
+    font-family: 'Monaco', 'Consolas', monospace !important;
+    font-size: 13px !important;
+    background-color: #fafafa !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* 可折叠面板 */
+.accordion {
+    border-radius: 10px !important;
+    border: 1px solid #e0e0e0 !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.accordion:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* 所有标签 */
+label {
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+}
+
+/* 行间距优化 */
+.gr-row {
+    margin-bottom: 20px !important;
+}
+
+/* 列内边距 */
+.gr-column {
+    padding: 0 10px !important;
+}
+
+/* 表格样式 */
+.dataframe {
+    border-collapse: collapse !important;
+}
+
+.dataframe th {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32) !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 12px !important;
+    text-align: left !important;
+}
+
+.dataframe td {
+    padding: 10px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.dataframe tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+.dataframe tr:hover {
+    background-color: #e8f5e8 !important;
+}
+
+/* 页面标题 */
+.gr-markdown h2 {
+    color: #2E7D32 !important;
+    border-bottom: 3px solid #4CAF50 !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 20px !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .gr-row {
+        flex-direction: column !important;
+    }
+    
+    .gr-column {
+        width: 100% !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #generate_btn, #train_btn, #fix_btn {
+        width: 100% !important;
+        margin: 5px 0 !important;
+    }
+}
+
+
+/* ===== 数据预览表格 ===== */
+#data_preview {
+    border-radius: 12px !important;
+    border: 2px solid #e0e0e0 !important;
+    overflow: auto !important;  /* 关键：允许滚动 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    background-color: white !important;
+    max-height: 400px !important;
+    min-height: 200px !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+/* 表格容器 */
+#data_preview .dataframe-container {
+    width: 100% !important;
+    min-width: 100% !important;
+    overflow-x: auto !important;  /* 水平滚动 */
+    overflow-y: auto !important;  /* 垂直滚动 */
+    display: block !important;
+}
+
+/* 表格本身 - 关键：不限制宽度，让内容决定宽度 */
+#data_preview .dataframe {
+    width: auto !important;
+    min-width: 100% !important;
+    table-layout: auto !important;  /* 自动布局，列宽根据内容调整 */
+    border-collapse: collapse !important;
+    font-size: 13px !important;
+}
+
+/* 表头样式 */
+#data_preview .dataframe th {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32) !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 12px 16px !important;
+    text-align: left !important;
+    border-bottom: 2px solid #2E7D32 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    white-space: nowrap !important;  /* 表头不换行 */
+    min-width: 80px !important;  /* 最小宽度 */
+}
+
+/* 表格单元格 */
+#data_preview .dataframe td {
+    padding: 10px 16px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    color: #333 !important;
+    max-width: 300px !important;  /* 最大宽度限制 */
+    word-wrap: break-word !important;
+    white-space: normal !important;  /* 允许单元格内换行 */
+}
+
+/* 隔行变色 */
+#data_preview .dataframe tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+#data_preview .dataframe tr:hover {
+    background-color: #e8f5e8 !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* 滚动条样式（Webkit浏览器） */
+#data_preview::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+#data_preview::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 4px !important;
+}
+
+#data_preview::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 4px !important;
+}
+
+#data_preview::-webkit-scrollbar-thumb:hover {
+    background: #555 !important;
+}
+
+/* Firefox 滚动条 */
+#data_preview {
+    scrollbar-width: thin !important;
+    scrollbar-color: #888 #f1f1f1 !important;
+}
+
+/* 列数太多时的提示样式 */
+.columns-count-tip {
+    margin-top: 8px !important;
+    font-size: 12px !important;
+    color: #666 !important;
+    text-align: right !important;
+    padding-right: 10px !important;
+}
+
