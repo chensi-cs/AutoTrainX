@@ -39,3 +39,5 @@ Thumbs.db
 # Jupyter 笔记本
 .ipynb_checkpoints
 # 持久化数据目录
+
+.vscode/

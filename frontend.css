@@ -38,6 +38,8 @@
     align-items: center !important;
 }
 
+.custom-group {background-color: white !important;border: none !important;}
+
 /* 确保两列行容器高度一致 */
 .gr-row[equal-height="true"] {
     height: 260px !important; /* 给一点额外空间 */
@@ -60,19 +62,44 @@
 /* gr-group内的按钮 - 占满宽度 */
 #llm_recommend_btn, #auto_recommend_btn {
     flex: 1 !important; /* 关键：各占50% */
-    margin: 0 !important;
-    padding: 14px 0 !important; /* 增加垂直内边距 */
+    padding: 14px  !important; /* 增加垂直内边距 */
     border-radius: 8px !important;
     min-width: 0 !important; /* 允许缩小 */
     max-width: 100% !important; /* 允许扩展到100% */
     width: 100% !important;
     font-size: 13px !important;
+    width: 100% !important;
+    margin: 5px 0 !important;
+}
+/* 大模型推荐按钮（紫色系） */
+#llm_recommend_btn {
+    background: linear-gradient(135deg, #f8a11e, #eb791c) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px rgba(230, 125, 99, 0.3) !important;
 }
 
-/* ==================== 问题3：背景改为白色 ==================== */
-.gr-group {
-    background: #ffffff !important; /* 纯白色背景 */
+/* 后台自动推荐按钮（绿色系） */
+#auto_recommend_btn {
+    background: linear-gradient(135deg, #4ce66e, #35bb52) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3) !important;
 }
+
+/* 悬停效果 */
+#llm_recommend_btn:hover {
+    background: linear-gradient(135deg,rgb(240, 144, 1), #da7019) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(230, 125, 99, 0.3) !important;
+}
+
+#auto_recommend_btn:hover {
+    background: linear-gradient(135deg, #46d465, #31ad4c) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4) !important;
+}
+
 
 /* gr-group悬停效果 */
 .gr-group:hover {
@@ -112,8 +139,10 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    text-align: center !important;
+    text-align: left !important;
 }
+
+
 
 /* 文件上传框悬停效果 */
 #file_upload:hover {
@@ -229,29 +258,14 @@
 
 /* 状态框 */
 #status_box {
-    background-color: rgba(255, 255, 255, 0.3) !important;
+    background-color:#fafafa !important;
     border-radius: 8px !important;
+    border: 1px solid #e0e0e0 !important;   
     padding: 15px !important;
     border-left: 5px solid #4CAF50 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1) !important;  /* 内阴影 */
 }
 
-
-/* 算法信息框优化 */
-#algo_info {
-    margin-top: 10px !important;
-    font-size: 13px !important;
-    line-height: 1.3 !important;
-    min-height: 60px !important;
-}
-
-/* 算法推荐按钮布局优化 */
-#llm_recommend_btn, #auto_recommend_btn {
-    width: 100% !important;
-    margin: 5px 0 !important;
-    padding: 12px !important;
-    border-radius: 8px !important;
-}
 
 /* 代码编辑器 */
 #code_box {
