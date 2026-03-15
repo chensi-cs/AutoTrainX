@@ -2,7 +2,7 @@
 Author: chensi-cs 
 Date: 2026-01-15 16:12:33
 LastEditors: chensi-cs 
-LastEditTime: 2026-01-22 21:47:18
+LastEditTime: 2026-02-13 00:30:18
 FilePath: \流程网页\backend.py
 Description: 
 '''
@@ -106,10 +106,12 @@ REMOTE_PASSWORD = os.getenv("REMOTE_PASSWORD")            # SSH 密码
 REMOTE_PORT = int(os.getenv("REMOTE_PORT", "22"))         # 例如 41942
 REMOTE_BASE_DIR = os.getenv("REMOTE_BASE_DIR", "/root/autodl_tmp")
 REMOTE_RECOMMEND_DIR = os.getenv("REMOTE_RECOMMEND_DIR", "/root/autodl_recommend")
+REMOTE_RAG_DIR = os.getenv("REMOTE_RECOMMEND_DIR", "/root/autodl_recommend/rag")
 
 print(f"🌐 远程服务器配置 - 主机: {REMOTE_HOST}, 端口: {REMOTE_PORT}, 用户: {REMOTE_USER}")
 print(f"📁 远程基础目录: {REMOTE_BASE_DIR}")
 print(f"📁 远程推荐目录: {REMOTE_RECOMMEND_DIR}")
+print(f"📁 远程RAG推荐目录: {REMOTE_RAG_DIR}")
 
 app = FastAPI(title="LLM Code Gen Backend (SiliconFlow + AutoDL)")
 
@@ -402,9 +404,7 @@ def _generate_with_continuation(base_messages: List[dict], end_marker: str = LLM
     code = full.split(end_marker)[0].rstrip() + "\n"
     return code
 
-
 # ================== 生成 train.py（完整输出） ==================
-
 def call_llm_to_generate_code(algorithm_name: str, dataset_path: str) -> str:
     if not algorithm_name:
         algorithm_name = "XGBRegressor"
@@ -455,7 +455,6 @@ def call_llm_to_generate_code(algorithm_name: str, dataset_path: str) -> str:
     ]
 
     return _generate_with_continuation(base_messages, end_marker=LLM_END_MARKER, max_rounds=LLM_CONTINUE_MAX_ROUNDS)
-
 
 # ================== 大模型根据数据推荐算法 ==================
 def call_llm_to_recommend_algorithm(dataset_path: str) -> str:
@@ -1353,7 +1352,7 @@ async def auto_recommend_algorithm(req: dict):
         return {"recommended_algorithm": "XGBClassifier"}
         
     
-# ================== 路由：生成代码（只生成，不上传） ==================
+# ================== 路由：生成代码 ==================
 @app.post("/generate_code_and_upload")
 async def generate_code_and_upload(
     dataset_id: str = Form(...),  # 从预处理接口获取的 dataset_id
